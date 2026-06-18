@@ -75,7 +75,7 @@ class TextAnalyzer:
             
     def count_specific_word(self, text: str, search_word: str) -> int:
         """
-        Count occurrences of a specific word in the text.
+        Count occurrences of a specific word in the text using a while loop.
         
         Args:
             text (str): The text to search through
@@ -96,18 +96,24 @@ class TextAnalyzer:
         text_lower = text.lower()
         search_word_lower = search_word.lower()
         
-        # Use regex to find whole words only
-        pattern = r'\b' + re.escape(search_word_lower) + r'\b'
-        matches = re.findall(pattern, text_lower)
+        # Split text into words
+        words = re.findall(r'\b\w+\b', text_lower)
         
-        count = len(matches)
+        # Use a while loop to count occurrences
+        count = 0
+        i = 0
+        while i < len(words):
+            if words[i] == search_word_lower:
+                count += 1
+            i += 1
+        
         logger.debug(f"Found '{search_word}' {count} times")
         
         return count
         
     def identify_most_common_word(self, text: str) -> Optional[str]:
         """
-        Identify the most common word in the text.
+        Identify the most common word in the text using a while loop.
         
         Args:
             text (str): The text to analyze
@@ -133,13 +139,30 @@ class TextAnalyzer:
         if not words:
             return None
             
-        # Count word frequencies
-        word_counts = Counter(words)
+        # Use a while loop to count word frequencies
+        word_counts = {}
+        i = 0
+        while i < len(words):
+            word = words[i]
+            if word in word_counts:
+                word_counts[word] += 1
+            else:
+                word_counts[word] = 1
+            i += 1
         
-        # Get the most common word
-        most_common = word_counts.most_common(1)
+        # Find the most common word using a while loop
+        max_count = 0
+        most_common_word = None
+        word_list = list(word_counts.items())
+        j = 0
+        while j < len(word_list):
+            word, count = word_list[j]
+            if count > max_count:
+                max_count = count
+                most_common_word = word
+            j += 1
         
-        result = most_common[0][0] if most_common else None
+        result = most_common_word
         logger.debug(f"Most common word: {result}")
         
         return result
@@ -164,9 +187,34 @@ class TextAnalyzer:
         
         if not words:
             return []
-            
-        word_counts = Counter(words)
-        return word_counts.most_common(top_n)
+        
+        # Use a while loop to count word frequencies
+        word_counts = {}
+        i = 0
+        while i < len(words):
+            word = words[i]
+            if word in word_counts:
+                word_counts[word] += 1
+            else:
+                word_counts[word] = 1
+            i += 1
+        
+        # Convert to list of tuples and sort using while loop
+        freq_list = list(word_counts.items())
+        
+        # Simple bubble sort using while loops
+        n = len(freq_list)
+        i = 0
+        while i < n - 1:
+            j = 0
+            while j < n - i - 1:
+                if freq_list[j][1] < freq_list[j + 1][1]:
+                    # Swap
+                    freq_list[j], freq_list[j + 1] = freq_list[j + 1], freq_list[j]
+                j += 1
+            i += 1
+        
+        return freq_list[:top_n]
         
     def calculate_average_word_length(self, text: str) -> float:
         """
@@ -186,19 +234,22 @@ class TextAnalyzer:
         if not text or not text.strip():
             return 0.0
             
-        # Remove punctuation and special characters
-        cleaned = re.sub(r'[^\w\s]', '', text)
-        
-        # Split into words
-        words = cleaned.split()
+        # Split by whitespace and keep punctuation
+        words = text.split()
         
         if not words:
             return 0.0
-            
-        # Calculate average length
-        total_length = sum(len(word) for word in words)
-        average = total_length / len(words)
         
+        # Use a while loop to calculate total length
+        total_length = 0
+        i = 0
+        while i < len(words):
+            # Remove punctuation from each word
+            clean_word = words[i].strip(string.punctuation)
+            total_length += len(clean_word)
+            i += 1
+        
+        average = total_length / len(words)
         result = round(average, 2)
         logger.debug(f"Average word length: {result}")
         
@@ -206,7 +257,7 @@ class TextAnalyzer:
         
     def count_paragraphs(self, text: str) -> int:
         """
-        Count the number of paragraphs in the text.
+        Count the number of paragraphs in the text using a while loop.
         
         Paragraphs are defined by empty lines between blocks of text.
         
@@ -227,17 +278,22 @@ class TextAnalyzer:
         # Split by double newlines (empty lines)
         paragraphs = text.split('\n\n')
         
-        # Filter out empty paragraphs
-        paragraphs = [p.strip() for p in paragraphs if p.strip()]
+        # Use a while loop to filter out empty paragraphs
+        non_empty_paragraphs = []
+        i = 0
+        while i < len(paragraphs):
+            if paragraphs[i].strip():
+                non_empty_paragraphs.append(paragraphs[i].strip())
+            i += 1
         
-        count = len(paragraphs) if paragraphs else 1
+        count = len(non_empty_paragraphs) if non_empty_paragraphs else 1
         logger.debug(f"Number of paragraphs: {count}")
         
         return count
         
     def count_sentences(self, text: str) -> int:
         """
-        Count the number of sentences in the text.
+        Count the number of sentences in the text using a while loop.
         
         Sentences are defined by punctuation marks: ., !, ?
         
@@ -260,19 +316,29 @@ class TextAnalyzer:
         common_abbr = ['Mr.', 'Mrs.', 'Dr.', 'Prof.', 'Inc.', 'Co.', 'Ltd.', 'etc.']
         
         text_processed = text
-        for abbr in common_abbr:
-            text_processed = text_processed.replace(abbr, abbr.replace('.', '|||'))
+        i = 0
+        while i < len(common_abbr):
+            text_processed = text_processed.replace(common_abbr[i], common_abbr[i].replace('.', '|||'))
+            i += 1
         
         # Split by sentence boundaries
         sentences = re.split(r'[.!?]+', text_processed)
         
-        # Replace back the abbreviations
-        sentences = [s.replace('|||', '.') for s in sentences]
+        # Replace back the abbreviations using a while loop
+        j = 0
+        while j < len(sentences):
+            sentences[j] = sentences[j].replace('|||', '.')
+            j += 1
         
-        # Filter out empty sentences
-        sentences = [s.strip() for s in sentences if s.strip()]
+        # Filter out empty sentences using a while loop
+        non_empty_sentences = []
+        k = 0
+        while k < len(sentences):
+            if sentences[k].strip():
+                non_empty_sentences.append(sentences[k].strip())
+            k += 1
         
-        count = len(sentences) if sentences else 1
+        count = len(non_empty_sentences) if non_empty_sentences else 1
         logger.debug(f"Number of sentences: {count}")
         
         return count
