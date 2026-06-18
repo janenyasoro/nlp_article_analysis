@@ -19,6 +19,77 @@ from src.file_handler import FileHandler
 from src.utils import setup_logging, format_results, validate_text
 
 
+def count_specific_word(text: str, search_word: str) -> int:
+    """
+    Wrapper function for counting specific words.
+    
+    Args:
+        text (str): The text to search through
+        search_word (str): The word to count
+        
+    Returns:
+        int: Number of occurrences
+    """
+    analyzer = TextAnalyzer()
+    return analyzer.count_specific_word(text, search_word)
+
+
+def identify_most_common_word(text: str) -> str:
+    """
+    Wrapper function for identifying the most common word.
+    
+    Args:
+        text (str): The text to analyze
+        
+    Returns:
+        str: Most common word
+    """
+    analyzer = TextAnalyzer()
+    return analyzer.identify_most_common_word(text)
+
+
+def calculate_average_word_length(text: str) -> float:
+    """
+    Wrapper function for calculating average word length.
+    
+    Args:
+        text (str): The text to analyze
+        
+    Returns:
+        float: Average word length
+    """
+    analyzer = TextAnalyzer()
+    return analyzer.calculate_average_word_length(text)
+
+
+def count_paragraphs(text: str) -> int:
+    """
+    Wrapper function for counting paragraphs.
+    
+    Args:
+        text (str): The text to analyze
+        
+    Returns:
+        int: Number of paragraphs
+    """
+    analyzer = TextAnalyzer()
+    return analyzer.count_paragraphs(text)
+
+
+def count_sentences(text: str) -> int:
+    """
+    Wrapper function for counting sentences.
+    
+    Args:
+        text (str): The text to analyze
+        
+    Returns:
+        int: Number of sentences
+    """
+    analyzer = TextAnalyzer()
+    return analyzer.count_sentences(text)
+
+
 def display_header(title: str) -> None:
     """Display a formatted header."""
     print("\n" + "=" * 70)
@@ -61,10 +132,12 @@ def main():
         # Initialize the text analyzer
         analyzer = TextAnalyzer()
         
-        # Display basic information
+        # Display basic information - FIXED: removed backslash from f-string
         print(f"\n ✅ Article loaded successfully!")
         print(f" 📊 Total characters: {len(article_text):,}")
-        print(f" 📊 Characters (no spaces): {len(article_text.replace(' ', '').replace('\\n', '')):,}")
+        # Fixed the backslash issue by calculating separately
+        chars_no_spaces = len(article_text.replace(' ', '').replace('\n', ''))
+        print(f" 📊 Characters (no spaces): {chars_no_spaces:,}")
         
         # Store all results for formatting
         results = {}
@@ -165,4 +238,20 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # If the script is run directly, execute main()
+    # But also allow function calls for testing
+    if len(sys.argv) > 1 and sys.argv[1] == "--test":
+        # Test mode - run test cases
+        print("Running test cases...")
+        test_text1 = "This is a test. This is only a test."
+        result1 = count_specific_word(test_text1, "test")
+        print(f"count_specific_word('{test_text1}', 'test') = {result1}")
+        
+        test_text2 = "apple apple banana banana banana"
+        result2 = count_specific_word(test_text2, "banana")
+        print(f"count_specific_word('{test_text2}', 'banana') = {result2}")
+        
+        result3 = count_specific_word("", "test")
+        print(f"count_specific_word('', 'test') = {result3}")
+    else:
+        sys.exit(main())
